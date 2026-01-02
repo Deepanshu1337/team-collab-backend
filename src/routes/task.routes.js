@@ -1,5 +1,8 @@
 import express from "express";
 
+import validate from "../middleware/validate.middleware.js";
+import { createTaskSchema, updateTaskSchema } from "../validators/task.validator.js";
+
 import authMiddleware from "../middleware/auth.middleware.js";
 import teamMiddleware from "../middleware/team.middleware.js";
 import roleMiddleware from "../middleware/role.middleware.js";
@@ -24,4 +27,14 @@ router.delete("/:id", authMiddleware, teamMiddleware, deleteTask);
 // Move task (Kanban drag & drop)
 router.put("/:id/move", authMiddleware, teamMiddleware, moveTask);
 
+router.post(
+  "/",
+  authMiddleware,
+  teamMiddleware,
+  roleMiddleware([ROLES.ADMIN, ROLES.MANAGER]),
+  validate(createTaskSchema),
+  createTask
+);
+
+router.put("/:id", authMiddleware, teamMiddleware, validate(updateTaskSchema), updateTask);
 export default router;

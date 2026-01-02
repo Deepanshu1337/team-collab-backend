@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Task, Project, User } from "../models/index.js";
 import { ROLES } from "../utils/constants.js";
+import { getIO } from "../socket/index.js";
 
 // GET /api/tasks?projectId=xxx
 export const getTasksByProject = async (req, res) => {
@@ -20,9 +21,7 @@ export const getTasksByProject = async (req, res) => {
     return res.status(404).json({ message: "Project not found" });
   }
 
-  const tasks = await Task.find({ projectId })
-    .populate("assignedTo", "name email")
-    .sort({ createdAt: -1 });
+  const tasks = await Task.find({ projectId }).populate("assignedTo", "name email").sort({ createdAt: -1 });
 
   res.status(200).json(tasks);
 };
@@ -67,6 +66,8 @@ export const createTask = async (req, res) => {
     position: newPosition,
     assignedTo: assignedTo || null,
   });
+  const io = getIO();
+  io.to(`team:${req.user.teamId}`).emit("task:created", { task });
 
   res.status(201).json({
     message: "Task created successfully",
@@ -99,8 +100,7 @@ export const updateTask = async (req, res) => {
     return res.status(403).json({ message: "Forbidden" });
   }
 
-  const isAdminOrManager =
-    req.user.role === ROLES.ADMIN || req.user.role === ROLES.MANAGER;
+  const isAdminOrManager = req.user.role === ROLES.ADMIN || req.user.role === ROLES.MANAGER;
 
   // ---- STATUS UPDATE ----
   if (status) {
@@ -112,9 +112,7 @@ export const updateTask = async (req, res) => {
     // MEMBER can update status only if task assigned to self
     if (!isAdminOrManager) {
       if (!task.assignedTo || task.assignedTo.toString() !== req.user.id) {
-        return res
-          .status(403)
-          .json({ message: "Cannot update status of unassigned task" });
+        return res.status(403).json({ message: "Cannot update status of unassigned task" });
       }
     }
 
@@ -124,9 +122,7 @@ export const updateTask = async (req, res) => {
   // ---- ASSIGNMENT ----
   if (assignedTo !== undefined) {
     if (!isAdminOrManager) {
-      return res
-        .status(403)
-        .json({ message: "Only ADMIN or MANAGER can assign tasks" });
+      return res.status(403).json({ message: "Only ADMIN or MANAGER can assign tasks" });
     }
 
     if (assignedTo !== null) {
@@ -155,9 +151,7 @@ export const updateTask = async (req, res) => {
   // ---- TITLE / DESCRIPTION ----
   if (title !== undefined || description !== undefined) {
     if (!isAdminOrManager) {
-      return res
-        .status(403)
-        .json({ message: "Only ADMIN or MANAGER can edit task details" });
+      return res.status(403).json({ message: "Only ADMIN or MANAGER can edit task details" });
     }
 
     if (title !== undefined) task.title = title;
@@ -165,6 +159,9 @@ export const updateTask = async (req, res) => {
   }
 
   await task.save();
+
+  const io = getIO();
+  io.to(`team:${req.user.teamId}`).emit("task:updated", { task });
 
   res.status(200).json({
     message: "Task updated successfully",
@@ -203,6 +200,10 @@ export const deleteTask = async (req, res) => {
   }
 
   await task.deleteOne();
+  const io = getIO();
+  io.to(`team:${req.user.teamId}`).emit("task:deleted", {
+    taskId: id,
+  });
 
   res.status(200).json({
     message: "Task deleted successfully",
@@ -234,8 +235,7 @@ export const moveTask = async (req, res) => {
   }
 
   // Permission: MEMBER can move only own task
-  const isAdminOrManager =
-    req.user.role === "ADMIN" || req.user.role === "MANAGER";
+  const isAdminOrManager = req.user.role === "ADMIN" || req.user.role === "MANAGER";
 
   if (!isAdminOrManager) {
     if (!task.assignedTo || task.assignedTo.toString() !== req.user.id) {
@@ -262,6 +262,9 @@ export const moveTask = async (req, res) => {
   task.position = newPosition;
 
   await task.save();
+
+  const io = getIO();
+  io.to(`team:${req.user.teamId}`).emit("task:moved", { task });
 
   res.status(200).json({
     message: "Task moved successfully",
