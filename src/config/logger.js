@@ -1,10 +1,11 @@
 import pino from "pino";
-import env from "./env.js"
+
+const nodeEnv = process.env.NODE_ENV || "development";
 
 const logger = pino({
-  level: env.nodeEnv === "production" ? "info" : "debug",
+  level: nodeEnv === "production" ? "info" : "debug",
   transport:
-    env.nodeEnv !== "production"
+    nodeEnv !== "production"
       ? { target: "pino-pretty" }
       : undefined,
 });

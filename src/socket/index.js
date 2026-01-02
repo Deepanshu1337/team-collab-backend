@@ -30,14 +30,14 @@ export const initSocket = (httpServer) => {
         firebaseUid: decoded.uid,
       });
 
-      if (!user || !user.teamId) {
-        return next(new Error("User not authorized for realtime"));
+      if (!user) {
+        return next(new Error("User not found"));
       }
 
-      // Attach trusted context to socket
+      // Attach trusted context to socket (teamId can be null for new users)
       socket.user = {
         id: user._id.toString(),
-        teamId: user.teamId.toString(),
+        teamId: user.teamId ? user.teamId.toString() : null,
         role: user.role,
       };
 
@@ -51,10 +51,13 @@ export const initSocket = (httpServer) => {
   io.on("connection", (socket) => {
     const { id, teamId } = socket.user;
 
-    // Join team-scoped room
-    socket.join(`team:${teamId}`);
-
-    console.log(`🔌 Socket connected | user=${id}`);
+    // Join team-scoped room only if user has a team
+    if (teamId) {
+      socket.join(`team:${teamId}`);
+      console.log(`🔌 Socket connected | user=${id} | team=${teamId}`);
+    } else {
+      console.log(`🔌 Socket connected | user=${id} | no team`);
+    }
 
     socket.on("disconnect", () => {
       console.log(`❌ Socket disconnected | user=${id}`);

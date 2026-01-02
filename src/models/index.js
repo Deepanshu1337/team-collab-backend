@@ -3,3 +3,4 @@ export { default as Team } from "./Team.model.js";
 export { default as Project } from "./Project.model.js";
 export { default as Task } from "./Task.model.js";
 export { default as Message } from "./Message.model.js";
+export { default as AssistantLog } from "./AssistantLog.model.js";

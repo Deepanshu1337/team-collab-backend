@@ -15,18 +15,7 @@ const router = express.Router();
 // Get tasks for a project (any team member)
 router.get("/", authMiddleware, teamMiddleware, getTasksByProject);
 
-// Create task (ADMIN / MANAGER)
-router.post("/", authMiddleware, teamMiddleware, roleMiddleware([ROLES.ADMIN, ROLES.MANAGER]), createTask);
-
-// Update task (status, assignment, details)
-router.put("/:id", authMiddleware, teamMiddleware, updateTask);
-
-// Delete task (ADMIN only)
-router.delete("/:id", authMiddleware, teamMiddleware, deleteTask);
-
-// Move task (Kanban drag & drop)
-router.put("/:id/move", authMiddleware, teamMiddleware, moveTask);
-
+// Create task (ADMIN / MANAGER) - with validation
 router.post(
   "/",
   authMiddleware,
@@ -36,5 +25,13 @@ router.post(
   createTask
 );
 
+// Update task (status, assignment, details) - with validation
 router.put("/:id", authMiddleware, teamMiddleware, validate(updateTaskSchema), updateTask);
+
+// Delete task (ADMIN only)
+router.delete("/:id", authMiddleware, teamMiddleware, deleteTask);
+
+// Move task (Kanban drag & drop)
+router.put("/:id/move", authMiddleware, teamMiddleware, moveTask);
+
 export default router;

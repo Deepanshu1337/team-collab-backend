@@ -1,40 +1,37 @@
-import logger from "./config/logger.js";
+import dotenv from "dotenv";
 import http from "http";
 import app from "./app.js";
 import connectDB from "./config/db.js";
-import env from "./config/env.js";
 import { initSocket } from "./socket/index.js";
 
-// -------------------- Create HTTP Server --------------------
+// ---------- Load Environment ----------
+dotenv.config();
+
+const PORT = process.env.PORT || 5000;
+
+// ---------- Create HTTP Server ----------
 const server = http.createServer(app);
 
-// -------------------- Bootstrap --------------------
+// ---------- Bootstrap ----------
 const startServer = async () => {
   try {
     await connectDB();
 
-    server.listen(env.port, () => {
-      logger.info(`🚀 Server running on port ${env.port}`);
-      logger.info(`🌱 Environment: ${env.nodeEnv}`);
-
-      initSocket(server);
+    server.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
     });
-  } catch (error) {
-    logger.error(error, "❌ Server startup failed");
 
+    // Initialize Socket.IO and attach to the HTTP server
+    try {
+      initSocket(server);
+      console.log("🔌 Socket.IO initialized");
+    } catch (err) {
+      console.error("❌ Failed to initialize Socket.IO:", err.message);
+    }
+  } catch (error) {
+    console.error("❌ Failed to start server:", error.message);
     process.exit(1);
   }
 };
-const shutdown = (signal) => {
-  logger.info(`${signal} received. Shutting down gracefully...`);
-
-  server.close(() => {
-    logger.info("HTTP server closed.");
-    process.exit(0);
-  });
-};
-
-process.on("SIGTERM", shutdown);
-process.on("SIGINT", shutdown);
 
 startServer();

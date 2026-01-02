@@ -1,52 +1,32 @@
 import express from "express";
-
-import authMiddleware from "../middleware/auth.middleware.js";
-import teamMiddleware from "../middleware/team.middleware.js";
-import roleMiddleware from "../middleware/role.middleware.js";
-import { ROLES } from "../utils/constants.js";
-
+import  authMiddleware  from "../middleware/auth.middleware.js";
 import {
   getProjects,
+  getProjectById,
   createProject,
-  updateProject,
+  assignProjectManager,
   deleteProject,
 } from "../controller/project.controller.js";
 
-
 const router = express.Router();
 
-// Get all projects (any team member)
-router.get(
-  "/",
-  authMiddleware,
-  teamMiddleware,
-  getProjects
-);
+// Apply auth middleware to all routes
+router.use(authMiddleware);
 
-// Create project (ADMIN / MANAGER only)
-router.post(
-  "/",
-  authMiddleware,
-  teamMiddleware,
-  roleMiddleware([ROLES.ADMIN, ROLES.MANAGER]),
-  createProject
-);
-// Update project (ADMIN / MANAGER)
-router.put(
-  "/:id",
-  authMiddleware,
-  teamMiddleware,
-  roleMiddleware([ROLES.ADMIN, ROLES.MANAGER]),
-  updateProject
-);
+// GET projects: if admin, get all; else get only user's projects
+router.get("/", getProjects);
 
-// Delete project (ADMIN only)
-router.delete(
-  "/:id",
-  authMiddleware,
-  teamMiddleware,
-  roleMiddleware([ROLES.ADMIN]),
-  deleteProject
-);
+// GET specific project by ID
+router.get("/:id", getProjectById);
+
+// CREATE project (admin or manager)
+router.post("/", createProject);
+
+// ASSIGN manager to project (admin only)
+router.patch("/:projectId/manager", assignProjectManager);
+
+
+// DELETE project (admin only)
+router.delete("/:id", deleteProject);
 
 export default router;

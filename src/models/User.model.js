@@ -18,16 +18,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    role: {
+    // globalRole applies across the app; team/project roles are stored on Team/Project documents
+    globalRole: {
       type: String,
-      enum: ["ADMIN", "MANAGER", "MEMBER"],
-      default: "MEMBER",
+      enum: ["ADMIN", "USER"],
+      default: "USER",
+      index: true,
     },
-    teamId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Team",
-      default: null,
-    },
+    // optional profile metadata
+    avatarUrl: { type: String, default: null },
+    // denormalized quick-lookup (optional)
+    teamIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Team" }],
+    projectIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Project" }],
   },
   { timestamps: true }
 );

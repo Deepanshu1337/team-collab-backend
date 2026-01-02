@@ -13,6 +13,8 @@ import teamRoutes from "./routes/team.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import taskRoutes from "./routes/task.routes.js";
 import messageRoutes from "./routes/message.routes.js";
+import assistantRoutes from "./routes/assistant.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
 
 import errorHandler from "./middleware/error.middleware.js";
 
@@ -25,16 +27,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", apiLimiter);
 
-// -------------------- Health Check --------------------
-app.get("/", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    service: "team-collab-api",
-    message: "API is running",
-  });
-});
 
-// Temporary protected route (for testing only)
+// Protected route - returns current user info
 app.get("/protected", authMiddleware, (req, res) => {
   res.status(200).json({
     message: "Access granted",
@@ -42,25 +36,12 @@ app.get("/protected", authMiddleware, (req, res) => {
   });
 });
 
-// Temporary role-protected route (ADMIN only)
-app.get("/admin-only", authMiddleware, roleMiddleware([ROLES.ADMIN]), (req, res) => {
-  res.status(200).json({
-    message: "Admin access granted",
-    user: req.user,
-  });
-});
-// Temporary team-scoped route
-app.get("/team-scope-test", authMiddleware, teamMiddleware, (req, res) => {
-  res.status(200).json({
-    message: "Team scope verified",
-    teamId: req.user.teamId,
-  });
-});
-
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/assistant", assistantRoutes);
 
 // -------------------- 404 Handler --------------------
 app.use((req, res) => {
