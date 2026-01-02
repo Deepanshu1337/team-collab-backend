@@ -1,0 +1,11 @@
+# Node
+node_modules/
+
+# Environment
+.env
+
+# Firebase credentials
+src/credentials/
+
+# Logs
+npm-debug.log*
