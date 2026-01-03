@@ -1,7 +1,7 @@
 import { ROLES } from "../utils/constants.js";
-
+import User from "../models/User.model.js";
 const roleMiddleware = (allowedRoles = []) => {
-  return (req, res, next) => {
+  return  async (req, res, next) => {
     // Safety check (auth middleware should have run)
     if (!req.user) {
       return res.status(401).json({
@@ -9,10 +9,10 @@ const roleMiddleware = (allowedRoles = []) => {
       });
     }
 
-    // Role check
-    if (!allowedRoles.includes(req.user.role)) {
+ const user = await User.findById(req.user.id).lean();
+    if (!allowedRoles.includes(userRole.role)) {
       return res.status(403).json({
-        message: "Forbidden: insufficient permissions",
+        message: "Forbidden: insufficient role",
       });
     }
 

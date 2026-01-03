@@ -1,15 +1,16 @@
-import express from "express";
-import authMiddleware from "../middleware/auth.middleware.js";
-import teamMiddleware from "../middleware/team.middleware.js";
-import { handleAssistantCommand } from "../assistant/assistant.controller.js";
+// import express from "express";
+// import authMiddleware from "../middleware/auth.middleware.js";
+// import teamContext from "../middleware/teamContext.middleware.js";
 
-const router = express.Router();
+// import { handleAssistantCommand } from "../assistant/assistant.controller.js";
 
-router.post(
-  "/",
-  authMiddleware,
-  teamMiddleware,
-  handleAssistantCommand
-);
+// const router = express.Router();
 
-export default router;
+// router.post(
+//   "/:teamId",
+//   authMiddleware,
+//   teamContext,
+//   handleAssistantCommand
+// );
+
+// export default router;

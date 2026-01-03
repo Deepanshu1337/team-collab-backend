@@ -1,37 +1,45 @@
 import express from "express";
-
-import validate from "../middleware/validate.middleware.js";
-import { createTaskSchema, updateTaskSchema } from "../validators/task.validator.js";
-
 import authMiddleware from "../middleware/auth.middleware.js";
-import teamMiddleware from "../middleware/team.middleware.js";
-import roleMiddleware from "../middleware/role.middleware.js";
-import { ROLES } from "../utils/constants.js";
+import teamContext from "../middleware/teamContext.middleware.js";
+import requireTeamRole from "../middleware/requireTeamRole.middleware.js";
 
-import { getTasksByProject, createTask, updateTask, deleteTask, moveTask } from "../controller/task.controller.js";
+import {
+  getTasks,
+  createTask,
+  updateTask,
+  deleteTask,
+} from "../controller/task.controller.js";
 
 const router = express.Router();
 
-// Get tasks for a project (any team member)
-router.get("/", authMiddleware, teamMiddleware, getTasksByProject);
-
-// Create task (ADMIN / MANAGER) - with validation
-router.post(
-  "/",
+router.get(
+  "/:teamId/projects/:projectId/tasks",
   authMiddleware,
-  teamMiddleware,
-  roleMiddleware([ROLES.ADMIN, ROLES.MANAGER]),
-  validate(createTaskSchema),
+  teamContext,
+  getTasks
+);
+
+router.post(
+  "/:teamId/projects/:projectId/tasks",
+  authMiddleware,
+  teamContext,
+  requireTeamRole(["ADMIN", "MANAGER"]),
   createTask
 );
 
-// Update task (status, assignment, details) - with validation
-router.put("/:id", authMiddleware, teamMiddleware, validate(updateTaskSchema), updateTask);
+router.put(
+  "/:teamId/tasks/:taskId",
+  authMiddleware,
+  teamContext,
+  updateTask
+);
 
-// Delete task (ADMIN only)
-router.delete("/:id", authMiddleware, teamMiddleware, deleteTask);
-
-// Move task (Kanban drag & drop)
-router.put("/:id/move", authMiddleware, teamMiddleware, moveTask);
+router.delete(
+  "/:teamId/tasks/:taskId",
+  authMiddleware,
+  teamContext,
+  requireTeamRole(["ADMIN"]),
+  deleteTask
+);
 
 export default router;

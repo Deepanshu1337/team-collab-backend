@@ -6,33 +6,14 @@ import User from "../models/User.model.js";
 // ADMIN Dashboard: all teams, projects, members, tasks
 export const getAdminDashboard = async (req, res) => {
   try {
-    const totalTeams = await Team.countDocuments({ isActive: true });
-    const totalProjects = await Project.countDocuments({ isArchived: false });
-    const totalMembers = await User.countDocuments({ globalRole: "USER" });
-    const totalAdmins = await User.countDocuments({ globalRole: "ADMIN" });
+    const totalTeams = await Team.countDocuments({ isActive: true, adminId: req.user.id });
+    const totalProjects = await Project.countDocuments({adminId: req.user.id});
     const totalTasks = await Task.countDocuments();
-    const completedTasks = await Task.countDocuments({ status: "DONE" });
-
-    const topTeams = await Team.find({ isActive: true })
-      .select("name members projectIds")
-      .limit(5)
-      .lean();
 
     res.json({
       totalTeams,
       totalProjects,
-      totalMembers,
-      totalAdmins,
       totalTasks,
-      completedTasks,
-      taskCompletionRate:
-        totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(2) : 0,
-      topTeams: topTeams.map((t) => ({
-        id: t._id,
-        name: t.name,
-        memberCount: t.members.length,
-        projectCount: t.projectIds.length,
-      })),
     });
   } catch (e) {
     console.error("Error fetching admin dashboard", e);
@@ -43,7 +24,7 @@ export const getAdminDashboard = async (req, res) => {
 // MANAGER Dashboard: teams and projects they manage, their tasks
 export const getManagerDashboard = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const teamsAsManager = await Team.find({
       "members.user": userId,
@@ -103,7 +84,7 @@ export const getManagerDashboard = async (req, res) => {
 // MEMBER Dashboard: teams they belong to, their assigned tasks
 export const getMemberDashboard = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const teams = await Team.find({
       "members.user": userId,

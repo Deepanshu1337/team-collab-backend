@@ -1,5 +1,8 @@
 import express from "express";
-import  authMiddleware from "../middleware/auth.middleware.js";
+import authMiddleware from "../middleware/auth.middleware.js";
+import teamContext from "../middleware/teamContext.middleware.js";
+import requireTeamRole from "../middleware/requireTeamRole.middleware.js";
+import roleMiddleware from "../middleware/role.middleware.js";
 import {
   getAdminDashboard,
   getManagerDashboard,
@@ -8,13 +11,25 @@ import {
 
 const router = express.Router();
 
-// Apply auth middleware to all routes
-router.use(authMiddleware);
+router.get(
+  "/admin",
+  authMiddleware,
+  getAdminDashboard
+);
 
-// Get dashboard stats based on user role
-router.get("/admin", getAdminDashboard);
-router.get("/manager", getManagerDashboard);
-router.get("/member", getMemberDashboard);
+router.get(
+  "/:teamId/manager",
+  authMiddleware,
+  teamContext,
+  requireTeamRole(["MANAGER"]),
+  getManagerDashboard
+);
 
+router.get(
+  "/:teamId/member",
+  authMiddleware,
+  teamContext,
+  getMemberDashboard
+);
 
 export default router;

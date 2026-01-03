@@ -1,25 +1,60 @@
 import express from "express";
 import authMiddleware from "../middleware/auth.middleware.js";
+import teamContext from "../middleware/teamContext.middleware.js";
+import requireTeamRole from "../middleware/requireTeamRole.middleware.js";
+
 import {
+  getTeams,
   createTeam,
-  inviteTeamMember,
-  getTeamMembers,
-  changeTeamMemberRole,
+  updateTeam,
+  deleteTeam,
 } from "../controller/team.controller.js";
+
+import {
+  inviteToTeam,
+  getTeamMembers,
+} from "../controller/teamMember.controller.js";
 
 const router = express.Router();
 
-
-// Create team (authenticated users only)
+/**
+ * Teams
+ */
+router.get("/", authMiddleware, getTeams);
 router.post("/", authMiddleware, createTeam);
 
-// Invite team member (admin only)
-router.post("/invite", authMiddleware, inviteTeamMember);
+router.put(
+  "/:teamId",
+  authMiddleware,
+  teamContext,
+  requireTeamRole(["ADMIN", "MANAGER"]),
+  updateTeam
+);
 
-// Change team member role (admin only)
-router.patch("/:teamId/members/:memberId/assign-manager", authMiddleware, changeTeamMemberRole);
+router.delete(
+  "/:teamId",
+  authMiddleware,
+  teamContext,
+  requireTeamRole(["ADMIN"]),
+  deleteTeam
+);
 
-// Get all team members
-router.get("/:teamId/members", authMiddleware, getTeamMembers);
+/**
+ * Team Members & Roles
+ */
+router.get(
+  "/:teamId/members",
+  authMiddleware,
+  teamContext,
+  getTeamMembers
+);
+
+router.post(
+  "/:teamId/invite",
+  authMiddleware,
+  teamContext,
+  requireTeamRole(["ADMIN"]),
+  inviteToTeam
+);
 
 export default router;
