@@ -30,6 +30,7 @@ export const initSocket = (httpServer) => {
         firebaseUid: decoded.uid,
       });
 
+   
       if (!user) {
         return next(new Error("User not found"));
       }
@@ -49,15 +50,34 @@ export const initSocket = (httpServer) => {
 
   // 🔌 Connection lifecycle
   io.on("connection", (socket) => {
-    const { id, teamId } = socket.user;
+    const { id, teamId, role } = socket.user;
 
-    // Join team-scoped room only if user has a team
+    // Join user's default team room if they have one
     if (teamId) {
       socket.join(`team:${teamId}`);
       console.log(`🔌 Socket connected | user=${id} | team=${teamId}`);
     } else {
       console.log(`🔌 Socket connected | user=${id} | no team`);
     }
+
+    // Handle joining a specific team room (for admins)
+    socket.on("join-team-room", (payload) => {
+      const { teamId: targetTeamId } = payload || {};
+      
+      // Admins can join any team room, others can only join their own team
+      if (role === 'ADMIN' || targetTeamId === teamId) {
+        socket.join(`team:${targetTeamId}`);
+        console.log(`👤 User ${id} joined team room: team:${targetTeamId}`);
+      }
+    });
+    
+    // Handle leaving a specific team room
+    socket.on("leave-team-room", (payload) => {
+      const { teamId: targetTeamId } = payload || {};
+      
+      socket.leave(`team:${targetTeamId}`);
+      console.log(`👤 User ${id} left team room: team:${targetTeamId}`);
+    });
 
     socket.on("disconnect", () => {
       console.log(`❌ Socket disconnected | user=${id}`);

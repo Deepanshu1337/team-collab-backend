@@ -1,7 +1,7 @@
 # 🚀 Real-Time Team Collaboration Backend
 
-A production-grade backend for a real-time team collaboration platform built with Node.js, Express, MongoDB, Socket.IO, and an AI-powered assistant.
-The system supports role-based access control, Kanban-style task management, realtime chat, and a natural language assistant.
+A production-grade backend for a real-time team collaboration platform built with Node.js, Express, MongoDB, Socket.IO.
+The system supports role-based access control, Kanban-style task management, realtime chat.
 
 ---
 
@@ -39,16 +39,7 @@ The system supports role-based access control, Kanban-style task management, rea
 
 ---
 
-### 🤖 AI Assistant (Gemini – Free Tier)
-- Natural language commands like:
-  - "Move task Fix login bug to done"
-  - "Assign API task to Rahul"
-- AI used only for intent extraction
-- Role-aware execution (cannot bypass permissions)
-- Full audit logging of assistant actions
-- Regex-based fallback if AI is unavailable
 
----
 
 ### 📡 Realtime Architecture
 - REST APIs as the single source of truth
@@ -81,8 +72,6 @@ The system supports role-based access control, Kanban-style task management, rea
 **Realtime**
 - Socket.IO
 
-**AI / NLP**
-- Google Gemini (free tier)
 
 **Security & Reliability**
 - Joi
@@ -103,11 +92,6 @@ src/
 │   ├── env.js
 │   ├── firebase.js
 │   └── logger.js
-├── assistant/
-│   ├── assistant.controller.js
-│   ├── assistant.service.js
-│   ├── assistant.parser.js
-│   └── assistant.prompts.js
 ├── socket/
 │   ├── index.js
 │   └── chat.sockets.js
@@ -130,7 +114,7 @@ src/
 | Delete project   |   ❌    |    ❌    |   ✅   |
 | Create task      |   ❌    |    ✅    |   ✅   |
 | Assign task      |   ❌    |    ✅    |   ✅   |
-| Use assistant    | Limited|    ✅    |   ✅   |
+
 
 ---
 
@@ -154,8 +138,6 @@ MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/<db_name>
 # Firebase Admin
 FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
 
-# AI Assistant
-GEMINI_API_KEY=
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MINUTES=15
@@ -190,20 +172,6 @@ Server will run at: http://localhost:5000
 - chat:new-message
 
 ---
-
-## 🤖 AI Assistant
-
-### Endpoint
-```
-POST /api/assistant
-```
-
-### Example Request
-```json
-{
-  "command": "Move task Fix login bug to done"
-}
-```
 
 ### Safety Design
 - AI only extracts intent

@@ -1,28 +1,48 @@
-// models/User.model.js
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
-  {
-    firebaseUid: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true,
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      lowercase: true,
-      unique: true,
-      index: true,
-    },
+const UserSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
   },
-  { timestamps: true }
-);
 
-export default mongoose.model("User", userSchema);
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+
+  firebaseUid: {
+    type: String,
+    unique: true
+  },
+
+  role: {
+    type: String,
+    enum: ['ADMIN', 'MANAGER', 'MEMBER'],
+    required: true
+  },
+
+  teamId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Team'
+  },
+
+  pendingInvites: [{
+    teamId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Team'
+    },
+    role: {
+      type: String,
+      enum: ['ADMIN', 'MANAGER', 'MEMBER']
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'accepted', 'rejected'],
+      default: 'pending'
+    }
+  }]
+}, { timestamps: true });
+
+export default mongoose.models.User || mongoose.model("User", UserSchema);

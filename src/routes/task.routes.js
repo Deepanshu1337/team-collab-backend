@@ -8,9 +8,15 @@ import {
   createTask,
   updateTask,
   deleteTask,
+  getTeamTasks,
+  getAssignedTasks,
+  getProjectsByIds,
 } from "../controller/task.controller.js";
 
 const router = express.Router();
+
+
+
 
 router.get(
   "/:teamId/projects/:projectId/tasks",
@@ -40,6 +46,28 @@ router.delete(
   teamContext,
   requireTeamRole(["ADMIN"]),
   deleteTask
+);
+
+// Route to get all tasks for a team
+router.get(
+  "/:teamId/tasks",
+  authMiddleware,
+  teamContext,
+  getTeamTasks
+);
+
+// Route to get tasks assigned to the current user
+router.get(
+  "/assigned",
+  authMiddleware,
+  getAssignedTasks
+);
+
+// Route to get projects by IDs
+router.get(
+  "/projects/assigned",
+  authMiddleware,
+  getProjectsByIds
 );
 
 export default router;
