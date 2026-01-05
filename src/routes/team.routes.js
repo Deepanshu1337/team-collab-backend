@@ -103,4 +103,12 @@ router.patch(
   assignManager
 );
 
+router.delete(
+  "/:teamId/members/:memberId",
+  authMiddleware,
+  teamContext,
+  requireTeamRole(["ADMIN", "MANAGER"]),
+  removeMemberFromTeam
+);
+
 export default router;
