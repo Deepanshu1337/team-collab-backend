@@ -1,213 +1,179 @@
-# 🚀 Real-Time Team Collaboration Backend
+# TeamCollab Backend
 
-A production-grade backend for a real-time team collaboration platform built with Node.js, Express, MongoDB, Socket.IO.
-The system supports role-based access control, Kanban-style task management, realtime chat.
+TeamCollab is a real-time team collaboration platform that enables teams to manage projects, tasks, and communicate effectively. The backend provides a robust API for user authentication, team management, project tracking, task management, and real-time messaging.
 
----
+## Features
 
-## ✨ Key Features
+- **User Authentication**: Secure authentication using Firebase
+- **Role-based Access Control**: Admin, Manager, and Member roles with different permissions
+- **Team Management**: Create, edit, and manage teams with member assignments
+- **Project Management**: Organize work into projects with team assignments
+- **Task Management**: Create, assign, and track tasks with drag-and-drop functionality
+- **Real-time Messaging**: WebSocket-based chat system for team communication
+- **Invitation System**: Invite users to teams via email
+- **Dashboard Analytics**: Track team performance and task completion
 
-### 🔐 Authentication & Authorization
-- Firebase Authentication (Admin SDK)
-- Role-based access control:
-  - ADMIN
-  - MANAGER
-  - MEMBER
-- Team-scoped authorization (data isolation per team)
+## Tech Stack
 
----
+- **Node.js**: JavaScript runtime environment
+- **Express.js**: Web application framework
+- **MongoDB**: NoSQL database
+- **Mongoose**: MongoDB object modeling
+- **Firebase**: Authentication and real-time features
+- **Socket.io**: Real-time bidirectional event-based communication
+- **TypeScript**: Strong typing for better code quality
 
-### 🧑‍🤝‍🧑 Team & Project Management
-- Team creation with automatic ADMIN assignment
-- Project CRUD with role enforcement
-- Secure team-based data access
+## Installation
 
----
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd team-collab-backend
+   ```
 
-### 📋 Task Management (Kanban)
-- Task CRUD with assignments
-- Status-based workflow: `todo → in-progress → done`
-- Position-based ordering for drag & drop Kanban boards
-- Realtime task sync across all team members
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
----
+3. **Set up environment variables**:
+   Create a `.env` file in the root directory and add the following:
+   ```env
+   PORT=5000
+   MONGODB_URI=mongodb://localhost:27017/team-collab
+   FIREBASE_PROJECT_ID=your-firebase-project-id
+   FIREBASE_PRIVATE_KEY_ID=your-private-key-id
+   FIREBASE_PRIVATE_KEY=your-private-key
+   FIREBASE_CLIENT_EMAIL=your-client-email
+   FIREBASE_CLIENT_ID=your-client-id
+   FIREBASE_AUTH_URI=https://accounts.google.com/o/oauth2/auth
+   FIREBASE_TOKEN_URI=https://oauth2.googleapis.com/token
+   FIREBASE_AUTH_PROVIDER_X509_CERT_URL=https://www.googleapis.com/oauth2/v1/certs
+   FIREBASE_CLIENT_X509_CERT_URL=your-client-cert-url
+   GEMINI_API_KEY=your-gemini-api-key
+   ```
 
-### 💬 Realtime Team Chat
-- Persistent chat messages stored in MongoDB
-- Realtime updates via Socket.IO
-- Team-scoped messaging
+4. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
 
----
+## API Endpoints
 
+### Authentication
+- `GET /protected` - Verify user authentication and get user info
 
+### Dashboard
+- `GET /api/dashboard/admin` - Get admin dashboard statistics
+- `GET /api/dashboard/:teamId/manager` - Get manager dashboard statistics
+- `GET /api/dashboard/:teamId/member` - Get member dashboard statistics
 
-### 📡 Realtime Architecture
-- REST APIs as the single source of truth
-- Socket.IO used only for broadcasting updates
-- Team-based socket rooms
-- Safe, scalable realtime design
+### Teams
+- `GET /api/teams` - Get all teams (for admin)
+- `GET /api/teams/:teamId` - Get team by ID
+- `POST /api/teams` - Create a new team
+- `PUT /api/teams/:teamId` - Update a team
+- `DELETE /api/teams/:teamId` - Delete a team
+- `GET /api/teams/:teamId/members` - Get team members
+- `POST /api/teams/:teamId/invite` - Invite user to team
+- `GET /api/teams/:teamId/pending-invitations` - Get pending invitations
+- `GET /api/teams/:teamId/available-users` - Get available users to invite
+- `PATCH /api/teams/:teamId/members/:memberId/assign-manager` - Assign manager role
+- `DELETE /api/teams/:teamId/members/:memberId` - Remove member from team
+- `GET /api/teams/pending-invitations-for-user` - Get pending invitations for current user
+- `GET /api/teams/project/:teamId` - Get projects for a team
 
----
+### Projects
+- `GET /api/projects/team` - Get projects for user's team
+- `GET /api/projects/admin/all` - Get all projects for admin
+- `POST /api/projects/:teamId` - Create a project
+- `PUT /api/projects/:id` - Update a project
+- `DELETE /api/projects/:teamId/:id` - Delete a project
+- `GET /api/projects/:id` - Get project by ID
+- `GET /api/projects/member` - Get projects assigned to member
 
-### 🛡️ Production Hardening
-- Joi request validation
-- Centralized error handling
-- Rate limiting
-- Security headers (Helmet)
-- Structured logging (Pino)
-- Graceful shutdown for deployments
+### Tasks
+- `GET /api/tasks/:teamId/projects/:projectId/tasks` - Get tasks for a project
+- `POST /api/tasks/:teamId/projects/:projectId/tasks` - Create a task
+- `PUT /api/tasks/:teamId/tasks/:taskId` - Update a task
+- `DELETE /api/tasks/:teamId/tasks/:taskId` - Delete a task
+- `PATCH /api/tasks/:teamId/tasks/:taskId/move` - Move task between columns
+- `GET /api/tasks/assigned` - Get tasks assigned to current user
+- `GET /api/tasks/:teamId/tasks` - Get all tasks for a team
 
----
+### Messages
+- `GET /api/messages/:teamId` - Get messages for a team
+- `POST /api/messages/:teamId` - Send a message to a team
 
-## 🛠 Tech Stack
+### Invitations
+- `GET /api/invitations/pending` - Get pending invitations for current user
+- `POST /api/invitations/accept` - Accept an invitation
+- `POST /api/invitations/reject` - Reject an invitation
 
-**Backend**
-- Node.js
-- Express.js
-- MongoDB + Mongoose
+## Environment Variables
 
-**Authentication**
-- Firebase Admin SDK
+| Variable | Description |
+|----------|-------------|
+| `PORT` | Port number for the server (default: 5000) |
+| `MONGODB_URI` | MongoDB connection string |
+| `FIREBASE_*` | Firebase configuration variables (project ID, private key, etc.) |
+| `GEMINI_API_KEY` | Google Gemini API key (optional) |
 
-**Realtime**
-- Socket.IO
+## Scripts
 
+- `npm run dev` - Start the development server with auto-restart
+- `npm start` - Start the production server
+- `npm test` - Run tests (if available)
 
-**Security & Reliability**
-- Joi
-- Helmet
-- express-rate-limit
-- Pino logger
-
----
-
-## 📂 Project Structure
+## Folder Structure
 
 ```
 src/
-├── app.js
-├── server.js
-├── config/
-│   ├── db.js
-│   ├── env.js
-│   ├── firebase.js
-│   └── logger.js
-├── socket/
-│   ├── index.js
-│   └── chat.sockets.js
-├── controller/
-├── routes/
-├── models/
-├── middleware/
-├── validators/
-└── utils/
+├── assistant/          # AI assistant functionality (if enabled)
+├── config/             # Configuration files
+├── controller/         # Request handlers
+├── credentials/        # Firebase service account
+├── middleware/         # Custom middleware
+├── models/             # Database models
+├── routes/             # API routes
+├── socket/             # Socket.io functionality
+├── utils/              # Utility functions
+├── validators/         # Request validation
+├── app.js              # Express app configuration
+└── server.js           # Server entry point
 ```
 
----
+## Database Models
 
-## 🔐 Roles & Permissions
+- **User**: Stores user information including Firebase UID, email, name, role, and team association
+- **Team**: Represents a team with name, description, and members
+- **Project**: Represents a project with name, description, and associated team
+- **Task**: Represents a task with title, description, status, and assignment
+- **Message**: Stores chat messages with sender and team information
 
-| Action           | MEMBER | MANAGER | ADMIN |
-|------------------|:------:|:-------:|:-----:|
-| View projects    |   ✅    |    ✅    |   ✅   |
-| Create project   |   ❌    |    ✅    |   ✅   |
-| Delete project   |   ❌    |    ❌    |   ✅   |
-| Create task      |   ❌    |    ✅    |   ✅   |
-| Assign task      |   ❌    |    ✅    |   ✅   |
+## Middleware
 
+- **auth.middleware.js**: Verifies Firebase tokens and attaches user context
+- **teamContext.middleware.js**: Attaches team context to requests
+- **requireTeamRole.middleware.js**: Ensures user has required role for team operations
+- **rateLimit.middleware.js**: Implements rate limiting to prevent abuse
 
----
+## Socket Events
 
-## ⚙️ Environment Setup
+- `chat:send` - Send a message to a team chat
+- `chat:new-message` - Receive a new message in real-time
+- `join-team-room` - Join a specific team's chat room
+- `leave-team-room` - Leave a specific team's chat room
 
-### 1️⃣ Create `.env`
-```bash
-cp .env.example .env
-```
+## Contributing
 
-Add the following variables:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
 
-```env
-# Server
-PORT=5000
-NODE_ENV=development
+## License
 
-# Database
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/<db_name>
-
-# Firebase Admin
-FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
-
-
-# Rate Limiting
-RATE_LIMIT_WINDOW_MINUTES=15
-RATE_LIMIT_MAX_REQUESTS=100
-```
-
-### 🔐 Firebase Admin Setup
-1. Go to Firebase Console → Project Settings → Service Accounts
-2. Generate a new private key
-3. Save it as `firebase-service-account.json`
-4. Place it in the project root
-5. Ensure it is listed in `.gitignore`
-
-### ▶️ Run Locally
-```bash
-npm install
-npm run dev
-```
-Server will run at: http://localhost:5000
-
----
-
-## 📡 Realtime Events
-
-### Task Events
-- task:created
-- task:updated
-- task:moved
-- task:deleted
-
-### Chat Events
-- chat:new-message
-
----
-
-### Safety Design
-- AI only extracts intent
-- All actions pass through role checks
-- All assistant actions are audit logged
-- Regex fallback if AI fails
-
----
-
-## 🌍 Deployment
-- Backend: Render / Railway
-- Database: MongoDB Atlas
-- AI: Gemini (free tier)
-
-Ensure all environment variables are configured on the deployment platform.
-
----
-
-## 🎯 Design Principles
-- REST APIs are the source of truth
-- Realtime is used only for synchronization
-- Defense-in-depth security
-- Clean, modular, scalable architecture
-- Provider-agnostic AI integration
-
----
-
-## 📌 Notes
-This project demonstrates:
-- Backend architecture skills
-- Realtime system design
-- Secure role-based access control
-- Responsible AI integration
-- Production-ready engineering practices
-
----
-
-## 👨‍💻 Author
-Built as a full-stack engineering assignment and learning project.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

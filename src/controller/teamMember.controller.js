@@ -167,10 +167,13 @@ export const inviteToTeam = async (req, res) => {
 
   let user = await User.findOne({ email });
   if (!user) {
-    // Create user with pending invitation
+    // Create user with a properly formatted temporary firebaseUid to avoid the null unique constraint issue
+    // Use a unique temporary identifier for invited users
+    const tempFirebaseUid = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     user = await User.create({
       email,
       name: email.split("@")[0],
+      firebaseUid: tempFirebaseUid, // Use temporary unique firebaseUid
       role: "MEMBER", // Default role for invited users
       pendingInvites: [{ teamId, role: targetRole, status: 'pending' }]
     });
