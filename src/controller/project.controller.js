@@ -12,6 +12,7 @@ export const getAllProjectsForAdmin = async (req, res) => {
     const cacheKey = `all_projects_admin_${req.user.id}`;
     const cachedResult = cache.get(cacheKey);
     
+    console.log('cachedResult:', cachedResult)
     if (cachedResult) {
       return res.json(cachedResult);
     }
@@ -21,6 +22,7 @@ export const getAllProjectsForAdmin = async (req, res) => {
       adminId: req.user.id
     }).populate('teamId', 'name description adminId').lean();
     
+    console.log("admin projects:", projects)
     // For each project, get the manager information
     const formattedProjects = [];
     for (const project of projects) {
