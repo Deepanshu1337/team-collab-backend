@@ -16,7 +16,7 @@ export const getAllProjectsForAdmin = async (req, res) => {
     if (cachedResult) {
       return res.json(cachedResult);
     }
-    
+    console.log("admin id via logged in user : ", req.user.id)
     // Find all projects where the user is the admin (using adminId field)
     const projects = await Project.find({
       adminId: req.user.id
